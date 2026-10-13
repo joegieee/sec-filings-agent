@@ -1,0 +1,130 @@
+# Company universe for ingestion. CIKs are checked at ingest time against the
+# tickers EDGAR returns for that CIK, so a typo fails loudly instead of
+# silently ingesting the wrong company.
+
+[sets]
+# Starter set: two large banks plus a fintech, so bank-only metrics
+# (NIM, CET1) are present for some filers and must come back null for others.
+core3 = ["JPM", "BAC", "PYPL"]
+banks = ["JPM", "BAC", "C", "WFC", "GS", "MS", "USB", "PNC", "TFC", "COF", "BK", "STT", "SCHW"]
+fintech = ["PYPL", "XYZ", "V", "MA", "AXP", "SOFI", "FI"]
+
+[[companies]]
+ticker = "JPM"
+cik = 19617
+name = "JPMorgan Chase & Co."
+sector = "bank"
+
+[[companies]]
+ticker = "BAC"
+cik = 70858
+name = "Bank of America Corp"
+sector = "bank"
+
+[[companies]]
+ticker = "C"
+cik = 831001
+name = "Citigroup Inc."
+sector = "bank"
+
+[[companies]]
+ticker = "WFC"
+cik = 72971
+name = "Wells Fargo & Company"
+sector = "bank"
+
+[[companies]]
+ticker = "GS"
+cik = 886982
+name = "Goldman Sachs Group Inc."
+sector = "bank"
+
+[[companies]]
+ticker = "MS"
+cik = 895421
+name = "Morgan Stanley"
+sector = "bank"
+
+[[companies]]
+ticker = "USB"
+cik = 36104
+name = "U.S. Bancorp"
+sector = "bank"
+
+[[companies]]
+ticker = "PNC"
+cik = 713676
+name = "PNC Financial Services Group Inc."
+sector = "bank"
+
+[[companies]]
+ticker = "TFC"
+cik = 92230
+name = "Truist Financial Corp"
+sector = "bank"
+
+[[companies]]
+ticker = "COF"
+cik = 927628
+name = "Capital One Financial Corp"
+sector = "bank"
+
+[[companies]]
+ticker = "BK"
+cik = 1390777
+name = "Bank of New York Mellon Corp"
+sector = "bank"
+
+[[companies]]
+ticker = "STT"
+cik = 93751
+name = "State Street Corp"
+sector = "bank"
+
+[[companies]]
+ticker = "SCHW"
+cik = 316709
+name = "Charles Schwab Corp"
+sector = "bank"
+
+[[companies]]
+ticker = "PYPL"
+cik = 1633917
+name = "PayPal Holdings Inc."
+sector = "fintech"
+
+[[companies]]
+ticker = "XYZ"
+cik = 1512673
+name = "Block Inc."
+sector = "fintech"
+
+[[companies]]
+ticker = "V"
+cik = 1403161
+name = "Visa Inc."
+sector = "payments"
+
+[[companies]]
+ticker = "MA"
+cik = 1141391
+name = "Mastercard Inc."
+sector = "payments"
+
+[[companies]]
+ticker = "AXP"
+cik = 4962
+name = "American Express Co"
+sector = "payments"
+
+[[companies]]
+ticker = "SOFI"
+cik = 1818874
+name = "SoFi Technologies Inc."
+sector = "fintech"
+
+[[companies]]
+ticker = "FI"
+cik = 798354
+name = "Fiserv Inc."
+sector = "fintech"

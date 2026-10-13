@@ -1,0 +1,226 @@
+# Analyst questions for the Q&A eval over JPM, BAC and PYPL.
+#
+# Numeric reference answers are not typed in: they are computed at eval time from
+# EDGAR's XBRL company facts (value, change, ratio, compare). `text` questions are
+# hand-labelled from the filings: the answer must contain every keyword group (any
+# one keyword per group) and cite a passage from that company. `unanswerable`
+# questions must be abstained on.
+#
+# Kinds and fields:
+#   value         ticker, metric, period
+#   change        ticker, metric, period (from), period_to   -> percent change
+#   ratio         ticker, metric (numerator), denominator, period -> percent
+#   compare       tickers, metric, period, pick = highest | lowest -> winner and its value
+#   text          ticker, keywords = [[any of...], ...]
+#   unanswerable  reason
+
+# --- single figures -----------------------------------------------------------------
+
+[[questions]]
+id = "jpm-net-income-fy2024"
+question = "What was JPMorgan Chase's net income for fiscal year 2024?"
+kind = "value"
+ticker = "JPM"
+metric = "net_income"
+period = "FY2024"
+
+[[questions]]
+id = "bac-total-assets-q2-2026"
+question = "What were Bank of America's total assets at the end of the second quarter of 2026?"
+kind = "value"
+ticker = "BAC"
+metric = "total_assets"
+period = "Q2 2026"
+
+[[questions]]
+id = "pypl-eps-fy2025"
+question = "What was PayPal's diluted earnings per share for 2025?"
+kind = "value"
+ticker = "PYPL"
+metric = "diluted_eps"
+period = "FY2025"
+
+[[questions]]
+id = "bac-nii-q3-2025"
+question = "How much net interest income did Bank of America earn in the third quarter of 2025?"
+kind = "value"
+ticker = "BAC"
+metric = "net_interest_income"
+period = "Q3 2025"
+
+[[questions]]
+id = "pypl-ocf-9m-2025"
+question = "What was PayPal's operating cash flow for the first nine months of 2025?"
+kind = "value"
+ticker = "PYPL"
+metric = "operating_cash_flow"
+period = "9M 2025"
+
+# --- changes over time ----------------------------------------------------------------
+
+[[questions]]
+id = "jpm-revenue-growth-fy2023-fy2025"
+question = "By what percentage did JPMorgan's total net revenue grow from fiscal 2023 to fiscal 2025?"
+kind = "change"
+ticker = "JPM"
+metric = "revenue"
+period = "FY2023"
+period_to = "FY2025"
+
+[[questions]]
+id = "bac-net-income-change-fy2025"
+question = "How did Bank of America's net income change in 2025 compared with 2024, in percent?"
+kind = "change"
+ticker = "BAC"
+metric = "net_income"
+period = "FY2024"
+period_to = "FY2025"
+
+[[questions]]
+id = "pypl-revenue-yoy-q3-2025"
+question = "What was PayPal's year-over-year revenue growth in Q3 2025?"
+kind = "change"
+ticker = "PYPL"
+metric = "revenue"
+period = "Q3 2024"
+period_to = "Q3 2025"
+
+[[questions]]
+id = "jpm-equity-growth-fy2023-fy2025"
+question = "How much did JPMorgan's total stockholders' equity grow between the end of 2023 and the end of 2025, in percent?"
+kind = "change"
+ticker = "JPM"
+metric = "total_equity"
+period = "FY2023"
+period_to = "FY2025"
+
+# --- ratios -------------------------------------------------------------------------------
+
+[[questions]]
+id = "pypl-net-margin-fy2025"
+question = "What was PayPal's net profit margin (net income as a share of revenue) in 2025?"
+kind = "ratio"
+ticker = "PYPL"
+metric = "net_income"
+denominator = "revenue"
+period = "FY2025"
+
+[[questions]]
+id = "bac-nii-share-fy2024"
+question = "What share of Bank of America's 2024 total net revenue came from net interest income?"
+kind = "ratio"
+ticker = "BAC"
+metric = "net_interest_income"
+denominator = "revenue"
+period = "FY2024"
+
+[[questions]]
+id = "jpm-return-on-equity-fy2025"
+question = "What was JPMorgan's 2025 net income as a percentage of its year-end 2025 total equity?"
+kind = "ratio"
+ticker = "JPM"
+metric = "net_income"
+denominator = "total_equity"
+period = "FY2025"
+
+# --- comparisons ------------------------------------------------------------------------
+
+[[questions]]
+id = "highest-net-income-fy2025"
+question = "Which of JPMorgan, Bank of America and PayPal had the highest net income in 2025, and how much was it?"
+kind = "compare"
+tickers = ["JPM", "BAC", "PYPL"]
+metric = "net_income"
+period = "FY2025"
+pick = "highest"
+
+[[questions]]
+id = "lowest-eps-fy2024"
+question = "Among JPMorgan, Bank of America and PayPal, which reported the lowest diluted EPS for 2024, and what was it?"
+kind = "compare"
+tickers = ["JPM", "BAC", "PYPL"]
+metric = "diluted_eps"
+period = "FY2024"
+pick = "lowest"
+
+[[questions]]
+id = "bigger-balance-sheet-q2-2026"
+question = "Was JPMorgan or Bank of America larger by total assets at the end of Q2 2026, and by how much were its assets?"
+kind = "compare"
+tickers = ["JPM", "BAC"]
+metric = "total_assets"
+period = "Q2 2026"
+pick = "highest"
+
+# --- from the filing text (hand-labelled) ------------------------------------------------
+
+[[questions]]
+id = "jpm-cet1-fy2024"
+question = "What were JPMorgan's Standardized and Advanced CET1 capital ratios at the end of 2024?"
+kind = "text"
+ticker = "JPM"
+keywords = [["15.7"], ["15.8"]]
+
+[[questions]]
+id = "bac-net-interest-yield-fy2024"
+question = "What was Bank of America's net interest yield for 2024, and what drove its change from 2023?"
+kind = "text"
+ticker = "BAC"
+keywords = [["1.95"], ["deposit"]]
+
+[[questions]]
+id = "pypl-tpv-fy2025"
+question = "How much total payment volume did PayPal process in 2025, and how fast did it grow?"
+kind = "text"
+ticker = "PYPL"
+keywords = [["1.79 trillion"], ["7%", "7 percent"]]
+
+# --- questions the filings can't answer ---------------------------------------------------
+
+[[questions]]
+id = "not-in-corpus-visa"
+question = "What was Visa's net income in fiscal 2024?"
+kind = "unanswerable"
+reason = "company not in the corpus"
+
+[[questions]]
+id = "not-in-corpus-citi-nim"
+question = "What was Citigroup's net interest margin in 2024?"
+kind = "unanswerable"
+reason = "company not in the corpus"
+
+[[questions]]
+id = "period-not-covered"
+question = "What was JPMorgan's revenue in fiscal 2019?"
+kind = "unanswerable"
+reason = "period not covered"
+
+[[questions]]
+id = "forecast-eps"
+question = "What will Bank of America's diluted EPS be in 2027?"
+kind = "unanswerable"
+reason = "forecast"
+
+[[questions]]
+id = "forecast-growth"
+question = "Which of JPMorgan, Bank of America and PayPal will grow revenue fastest next year?"
+kind = "unanswerable"
+reason = "forecast"
+
+[[questions]]
+id = "investment-advice"
+question = "Should I buy PayPal stock right now?"
+kind = "unanswerable"
+reason = "investment advice"
+
+[[questions]]
+id = "market-data"
+question = "What is JPMorgan's share price today?"
+kind = "unanswerable"
+reason = "real-time market data"
+
+[[questions]]
+id = "not-applicable-cet1"
+question = "What was PayPal's CET1 capital ratio at the end of 2025?"
+kind = "unanswerable"
+reason = "metric does not apply (not a bank)"
