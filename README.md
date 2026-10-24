@@ -138,10 +138,12 @@ company facts, so their values are not scored there.
 “Context recall” checks whether the expected numeric magnitude occurs anywhere in the
 selected text at a common scale. It does not check the metric label or table column.
 
-The [26 Q&A questions](evals/qa_core3.toml) cover figures, changes, ratios, comparisons,
+The [29 Q&A questions](evals/qa_core3.toml) cover figures, changes, ratios, comparisons,
 filing text and abstentions. Numeric references are computed from XBRL; text questions
-use keyword groups. Because the agent can also read XBRL, this evaluates tool use and
-answer handling separately from extraction. JSON reports are written to `data/evals/`.
+use keyword groups and must cite a search passage, so they test retrieval. A `quoted`
+question may instead cite an extracted figure whose quote contains the answer. Because
+the agent can also read XBRL, this evaluates tool use and answer handling separately
+from extraction. JSON reports are written to `data/evals/`.
 
 ### Results
 
@@ -169,14 +171,18 @@ $0.0019 and 7.4 s per filing.
 
 | Measure | Score | Count |
 |---|---:|---:|
-| Answer accuracy (answerable) | 94.4% | 17/18 |
+| Answer accuracy (answerable) | 95.2% | 20/21 |
 | Abstention accuracy (unanswerable) | 100.0% | 8/8 |
-| False abstentions | 5.6% | 1/18 |
-| Citation precision | 100.0% | 32/32 |
+| False abstentions | 4.8% | 1/21 |
+| Citation precision | 100.0% | 39/39 |
+| From filing text | 80.0% | 4/5 |
 
-The false abstention came from the number check: the model gave a CET1 ratio that no
-retrieved source contained, so the answer was withheld. Q&A averaged 1.7 LLM calls,
-$0.0009 and 4.6 s per question.
+The set grew from 26 to 29 questions after the first run. A CET1 question had been
+answered correctly from an extracted figure's quote without searching, so it moved to
+the `quoted` kind, and three questions that only search can answer were added. The
+false abstention is a model error: Haiku subtracted two account counts itself instead of
+using the calculator, so the number check withheld the answer. Q&A averaged 1.8 LLM
+calls, $0.0010 and 4.8 s per question.
 
 ## Providers
 
