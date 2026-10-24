@@ -137,14 +137,47 @@ company facts, so their values are not scored there.
 
 “Context recall” checks whether the expected numeric magnitude occurs anywhere in the
 selected text at a common scale. It does not check the metric label or table column.
-The earlier README reported 234/234 over a 36-filing corpus; the underlying run artifact
-is not checked in, so that result is unverified here. Live extraction and Q&A results
-have not been published.
 
 The [26 Q&A questions](evals/qa_core3.toml) cover figures, changes, ratios, comparisons,
 filing text and abstentions. Numeric references are computed from XBRL; text questions
 use keyword groups. Because the agent can also read XBRL, this evaluates tool use and
 answer handling separately from extraction. JSON reports are written to `data/evals/`.
+
+### Results
+
+Run on 24 Oct 2026 over the 36 core3 filings (JPM, BAC, PYPL; 10-K and 10-Q, 2023–2026)
+with `claude-haiku-5-5` at default effort. The JSON reports are not checked in.
+
+Context recall was 234/234. The selected context averaged 14,898 characters (about 3,700
+tokens), and no filing was truncated.
+
+| Metric | Accuracy (±0.5%) | Correct | Citations valid |
+|---|---:|---:|---:|
+| Revenue | 100.0% | 35/35 | 100.0% |
+| Net income | 100.0% | 35/35 | 100.0% |
+| Diluted EPS | 100.0% | 35/35 | 100.0% |
+| Total assets | 100.0% | 35/35 | 100.0% |
+| Total equity | 100.0% | 35/35 | 100.0% |
+| Operating cash flow | 100.0% | 35/35 | 100.0% |
+| Net interest income | 100.0% | 24/24 | 100.0% |
+| All scored metrics | 100.0% | 234/234 | 100.0% |
+
+Every correct value was also an exact match, and null handling was 100%. These metrics
+come from the primary statements, which makes them the easy case; NIM and CET1 are only
+checked for null handling. Extraction averaged 10,612 input and 1,748 output tokens,
+$0.0019 and 7.4 s per filing.
+
+| Measure | Score | Count |
+|---|---:|---:|
+| Answer accuracy (answerable) | 88.9% | 16/18 |
+| Abstention accuracy (unanswerable) | 100.0% | 8/8 |
+| False abstentions | 11.1% | 2/18 |
+| Citation precision | 100.0% | 31/31 |
+
+Both false abstentions came from the number check. In one, the period label "9M" was read
+as an unsourced number. In the other, the model gave a CET1 ratio that no retrieved source
+contained, so the answer was withheld. Q&A averaged 1.7 LLM calls, $0.0009 and 4.6 s per
+question.
 
 ## Providers
 
@@ -197,5 +230,5 @@ uv run mypy
 Start with [`cli.py`](src/filings_agent/cli.py) for command wiring,
 [`pipeline.py`](src/filings_agent/pipeline.py) for parse/extract runs, or
 [`agent.py`](src/filings_agent/agent/agent.py) for the question loop.
-The next useful milestone is a reproducible live evaluation before expanding retrieval
-or adding a web interface.
+The next milestone is the full company set and the retrieval experiments, before adding a
+web interface.
