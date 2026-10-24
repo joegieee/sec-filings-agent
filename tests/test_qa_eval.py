@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from filings_agent.agent.agent import Agent
-from filings_agent.agent.models import AgentAnswer, AgentStep, FinalAnswer, ToolCall
+from filings_agent.agent.models import AgentAnswer, AgentStep, FinalAnswer, SourceRef, ToolCall
 from filings_agent.agent.tools import Toolbox
 from filings_agent.evals.qa import (
     Question,
@@ -14,6 +14,7 @@ from filings_agent.evals.qa import (
     names_company,
     reference,
     run_qa,
+    score,
 )
 from filings_agent.evals.report import qa_markdown
 from filings_agent.extract.models import Metric
@@ -106,6 +107,29 @@ def test_names_company() -> None:
     assert names_company("BAC led", "BAC", "Bank of America Corp")
     assert names_company("Bank of America led", "BAC", "BANK OF AMERICA CORP /DE/")
     assert not names_company("the other bank led", "BAC", "Bank of America Corp")
+
+
+def test_only_quoted_questions_accept_extracted_quotes() -> None:
+    quote = SourceRef(
+        id="F1",
+        kind="fact",
+        text="[F1] ...",
+        ticker="JPM",
+        source="extracted",
+        evidence="Standardized and Advanced CET1 ratios were 15.7% and 15.8%",
+    )
+    answer = AgentAnswer(
+        query_id="x",
+        question="?",
+        model="m",
+        text="Standardized 15.7%, Advanced 15.8%.",
+        abstained=False,
+        citations=[quote],
+        sources=[quote],
+    )
+    for kind, outcome in [("quoted", "correct"), ("text", "wrong")]:
+        question = q(id="c", kind=kind, ticker="JPM", keywords=[["15.7"], ["15.8"]])
+        assert score(question, answer, None, {}).outcome == outcome
 
 
 def _ask(*steps: AgentStep) -> Agent:

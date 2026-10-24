@@ -3,8 +3,9 @@
 # Numeric reference answers are not typed in: they are computed at eval time from
 # EDGAR's XBRL company facts (value, change, ratio, compare). `text` questions are
 # hand-labelled from the filings: the answer must contain every keyword group (any
-# one keyword per group) and cite a passage from that company. `unanswerable`
-# questions must be abstained on.
+# one keyword per group) and cite a passage from that company, so they test search.
+# `quoted` questions are scored the same way, but an extracted figure's quote from that
+# company also counts as a citation. `unanswerable` questions must be abstained on.
 #
 # Kinds and fields:
 #   value         ticker, metric, period
@@ -12,6 +13,7 @@
 #   ratio         ticker, metric (numerator), denominator, period -> percent
 #   compare       tickers, metric, period, pick = highest | lowest -> winner and its value
 #   text          ticker, keywords = [[any of...], ...]
+#   quoted        ticker, keywords = [[any of...], ...]
 #   unanswerable  reason
 
 # --- single figures -----------------------------------------------------------------
@@ -157,7 +159,7 @@ pick = "highest"
 [[questions]]
 id = "jpm-cet1-fy2024"
 question = "What were JPMorgan's Standardized and Advanced CET1 capital ratios at the end of 2024?"
-kind = "text"
+kind = "quoted"
 ticker = "JPM"
 keywords = [["15.7"], ["15.8"]]
 
@@ -174,6 +176,27 @@ question = "How much total payment volume did PayPal process in 2025, and how fa
 kind = "text"
 ticker = "PYPL"
 keywords = [["1.79 trillion"], ["7%", "7 percent"]]
+
+[[questions]]
+id = "jpm-provision-fy2024"
+question = "What was JPMorgan's provision for credit losses in 2024, and how did it change from 2023?"
+kind = "text"
+ticker = "JPM"
+keywords = [["10,678", "10.7 billion", "10.68 billion"], ["15%", "15 percent", "9,320", "9.3 billion"]]
+
+[[questions]]
+id = "pypl-active-accounts-fy2024"
+question = "How many active accounts did PayPal have at the end of 2024, and how did that compare with a year earlier?"
+kind = "text"
+ticker = "PYPL"
+keywords = [["434 million"], ["2%", "2 percent", "426 million"]]
+
+[[questions]]
+id = "pypl-transactions-per-account-fy2024"
+question = "How many payment transactions per active account did PayPal report for 2024?"
+kind = "text"
+ticker = "PYPL"
+keywords = [["60.6"]]
 
 # --- questions the filings can't answer ---------------------------------------------------
 

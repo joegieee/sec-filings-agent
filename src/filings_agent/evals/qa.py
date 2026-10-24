@@ -8,6 +8,7 @@ Scoring is mechanical, with no LLM judge:
   precision it is written (and within 5%);
 * compare: the answer names the right company and gives its value;
 * text: every keyword group appears, and a passage from that company is cited;
+* quoted: as text, but an extracted figure's quote from that company also counts;
 * unanswerable: the agent abstained.
 
 Citation precision is the share of cited sources that are about the question's
@@ -32,7 +33,7 @@ from filings_agent.agent.models import AgentAnswer, SourceRef
 from filings_agent.extract.models import METRICS, Metric
 from filings_agent.llm.base import LLMConfigError
 
-QuestionKind = Literal["value", "change", "ratio", "compare", "text", "unanswerable"]
+QuestionKind = Literal["value", "change", "ratio", "compare", "text", "quoted", "unanswerable"]
 MAX_REL_ERROR = 0.05
 
 
@@ -58,6 +59,7 @@ class Question(BaseModel):
             "ratio": ("ticker", "metric", "denominator", "period"),
             "compare": ("tickers", "metric", "period"),
             "text": ("ticker", "keywords"),
+            "quoted": ("ticker", "keywords"),
             "unanswerable": (),
         }
         missing = [f for f in need[self.kind] if not getattr(self, f)]
@@ -104,8 +106,8 @@ def _one(index: FinancialsIndex, ticker: str, metric: Metric, period: str) -> fl
 
 
 def reference(q: Question, index: FinancialsIndex) -> Reference | None:
-    """The reference answer from XBRL figures; None for text and unanswerable questions."""
-    if q.kind in ("text", "unanswerable"):
+    """The reference answer from XBRL figures; None for keyword and unanswerable questions."""
+    if q.kind in ("text", "quoted", "unanswerable"):
         return None
     assert q.metric is not None and q.period is not None
     label = METRICS[q.metric].label.lower()
@@ -245,11 +247,15 @@ def score(
         result.outcome = "false_abstention"
         return result
     text = answer.text
-    if q.kind == "text":
+    if q.kind in ("text", "quoted"):
         assert q.ticker
         found = all(any(k.lower() in text.lower() for k in group) for group in q.keywords)
-        cites_passage = any(c.kind == "passage" and c.ticker == q.ticker for c in relevant)
-        ok = found and cites_passage
+        cites_text = any(
+            c.ticker == q.ticker
+            and (c.kind == "passage" or (q.kind == "quoted" and c.source == "extracted"))
+            for c in relevant
+        )
+        ok = found and cites_text
     else:
         assert ref is not None and ref.value is not None
         ok = mentions_value(text, ref.value, ref.unit)

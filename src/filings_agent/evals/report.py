@@ -147,6 +147,7 @@ _KIND_LABELS = {
     "ratio": "Ratio",
     "compare": "Comparison",
     "text": "From filing text",
+    "quoted": "From a quoted figure",
     "unanswerable": "Unanswerable (must abstain)",
 }
 
