@@ -135,5 +135,8 @@ def ungrounded(draft: str, values: Iterable[float], passages: Iterable[str]) -> 
             continue
         if any(mention.matches(n, scales=(1.0,)) for n in printed):
             continue
+        # Filing tables print amounts in thousands or millions, which "$10.7 billion" restates.
+        if mention.scale and any(mention.matches(n * unit) for n in printed for unit in (1e3, 1e6)):
+            continue
         missing.append(mention.raw)
     return missing

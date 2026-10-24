@@ -283,6 +283,10 @@ def test_ungrounded_numbers_are_reported() -> None:
         ungrounded("Net income was $58.5 billion ($58,471 million), EPS $19.75.", values, []) == []
     )
     assert ungrounded("It was $60 billion.", values, []) == ["$60 billion"]
+    table = ["Provision for credit losses | 10,678 | 9,320"]
+    assert ungrounded("It was $10.7 billion, up from $9.3 billion.", [], table) == []
+    assert ungrounded("It was $10.8 billion.", [], table) == ["$10.8 billion"]
+    assert ungrounded("TPV was $1.79 trillion.", [], ["TPV of $1.79 trillion"]) == []
     assert (
         ungrounded(
             "Yield fell 13 bps to 1.95 percent.", [], ["decreased 13 basis points to 1.95 percent"]
