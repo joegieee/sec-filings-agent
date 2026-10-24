@@ -1,16 +1,58 @@
 # sec-filings-agent
 
-Download SEC 10-Ks and 10-Qs, extract financial figures, and ask questions against the
-stored filings. Answers include filing links and evidence; extraction results can be
-compared with EDGAR's XBRL company facts.
+An LLM agent that answers analyst questions about SEC filings, with a source for every
+number. It downloads 10-Ks and 10-Qs from EDGAR, extracts key financial figures with a
+quoted citation for each, and answers questions such as "How did JPMorgan's net income
+change from 2023 to 2024?" using tools for figures, search and arithmetic. The model
+never does arithmetic itself, and an answer containing a number that no source supports
+is withheld instead of guessed.
 
-The starter corpus is JPMorgan, Bank of America and PayPal (`core3`). Two banks and a
-fintech exercise an important distinction: a missing bank ratio is expected for PayPal,
-but worth investigating for JPMorgan. The company config has 20 names; the parsing work
-and evaluation questions so far focus on these three.
+On 36 filings from JPMorgan, Bank of America and PayPal, Claude Haiku 5.5 extracted
+234/234 figures correctly against EDGAR's XBRL data, answered 20 of 21 answerable
+questions correctly, and declined all 8 that the filings can't answer. Both evals together
+cost about $0.10.
+See [Results](#results).
 
-This is a CLI project. Ingestion, parsing, extraction, keyword search and the agent loop
-are implemented. Live extraction and Q&A accuracy results are still pending.
+The starter corpus (`core3`) pairs two banks with a fintech, which exercises an important
+distinction: a missing bank ratio is expected for PayPal, but worth investigating for
+JPMorgan. The company config has 20 names; parsing and evaluation so far focus on these
+three. This is a CLI project; an MCP server and a web demo are planned.
+
+## How it works
+
+```mermaid
+flowchart TB
+    edgar[("SEC EDGAR<br/>filings and XBRL facts")]
+
+    subgraph pipeline [Pipeline]
+        ingest["Ingest<br/>rate-limited, idempotent"] --> parse["Parse<br/>sections and blocks"]
+        parse --> extract["Extract<br/>LLM structured output"]
+        extract --> check["Citation check<br/>quote must show the number"]
+        parse --> index["Index<br/>SQLite FTS5, BM25"]
+    end
+
+    subgraph agent [Agent]
+        question(["Question"]) --> loop["LLM tool loop<br/>up to 4 steps"]
+        loop --> tools["get_financials · compare<br/>search_filings · calculate"]
+        tools --> loop
+        loop --> guard["Guardrail<br/>every number sourced and cited"]
+        guard --> answer(["Answer with citations,<br/>or abstain"])
+    end
+
+    edgar --> ingest
+    check -- figures --> tools
+    edgar -- XBRL fallback --> tools
+    index -- passages --> tools
+    edgar -. ground truth .-> evals["Evals<br/>extraction vs XBRL, Q&A set"]
+    check -.-> evals
+    answer -.-> evals
+```
+
+Each figure is extracted with a quote from the filing, and is kept only if the quote is
+in the cited block and shows the number. The agent reads those figures, falling back to
+XBRL, and searches the filing text for anything else. Calculations are written as
+placeholders and evaluated in Python. Before an answer is returned, every number in it
+must match a source; otherwise the agent abstains.
 
 ## Run it
 
