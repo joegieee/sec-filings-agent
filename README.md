@@ -169,15 +169,14 @@ $0.0019 and 7.4 s per filing.
 
 | Measure | Score | Count |
 |---|---:|---:|
-| Answer accuracy (answerable) | 88.9% | 16/18 |
+| Answer accuracy (answerable) | 94.4% | 17/18 |
 | Abstention accuracy (unanswerable) | 100.0% | 8/8 |
-| False abstentions | 11.1% | 2/18 |
-| Citation precision | 100.0% | 31/31 |
+| False abstentions | 5.6% | 1/18 |
+| Citation precision | 100.0% | 32/32 |
 
-Both false abstentions came from the number check. In one, the period label "9M" was read
-as an unsourced number. In the other, the model gave a CET1 ratio that no retrieved source
-contained, so the answer was withheld. Q&A averaged 1.7 LLM calls, $0.0009 and 4.6 s per
-question.
+The false abstention came from the number check: the model gave a CET1 ratio that no
+retrieved source contained, so the answer was withheld. Q&A averaged 1.7 LLM calls,
+$0.0009 and 4.6 s per question.
 
 ## Providers
 
