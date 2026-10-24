@@ -245,10 +245,10 @@ def test_chunking_groups_paragraphs_and_keeps_tables_alone() -> None:
 def test_mentions_skip_dates_years_and_counts() -> None:
     text = (
         "On December 31, 2024 (2024-12-31) the 3 banks reported $58.5 billion, 18%, "
-        "$19.75 per share and 12.4bn in FY2024 Q3 under Form 10-K."
+        "$19.75 per share and 12.4bn in FY2024 Q3 and 9M 2025 under Form 10-K, not $9M."
     )
     raw = [m.raw for m in mentions(text)]
-    assert raw == ["$58.5 billion", "18%", "$19.75", "12.4bn"]
+    assert raw == ["$58.5 billion", "18%", "$19.75", "12.4bn", "$9M"]
 
 
 def test_render_evaluates_placeholders() -> None:

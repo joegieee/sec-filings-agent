@@ -2,7 +2,7 @@
 
 Matching uses numeric magnitudes at the written precision, with scale alternatives
 for bare numbers. It does not verify sign, units, period or claim-to-citation
-alignment. Dates, years and small plain counts are skipped.
+alignment. Dates, period labels, years and small plain counts are skipped.
 """
 
 from __future__ import annotations
@@ -35,6 +35,8 @@ _DATES = re.compile(
     rf"\b\d{{4}}-\d{{2}}-\d{{2}}\b|\b(?:{_MONTHS})\s+\d{{1,2}}(?:st|nd|rd|th)?(?:,?\s+\d{{4}})?",
     re.IGNORECASE,
 )
+# Year-to-date labels such as "9M 2025", as the tools write periods; "$9M" stays a number.
+_PERIODS = re.compile(r"(?<![\w$.])(?:3|6|9|12)M\s*\d{4}\b", re.IGNORECASE)
 _NUMBER = re.compile(
     r"(?<![\w.])(?P<dollar>\$\s?)?(?P<sign>-|\N{MINUS SIGN})?(?P<int>\d{1,3}(?:,\d{3})+|\d+)"
     r"(?P<frac>\.\d+)?(?:\s?(?P<pct>%|percent\b)|\s?(?P<scale>thousand|million|billion|trillion"
@@ -64,9 +66,9 @@ class Mention:
 
 
 def mentions(text: str) -> list[Mention]:
-    """Numbers written in ``text``, skipping dates, years and small counts."""
+    """Numbers written in ``text``, skipping dates, period labels, years and small counts."""
     found = []
-    for m in _NUMBER.finditer(_DATES.sub(" ", text)):
+    for m in _NUMBER.finditer(_PERIODS.sub(" ", _DATES.sub(" ", text))):
         digits = m.group("int").replace(",", "")
         frac = m.group("frac") or ""
         literal = float(digits + frac)
