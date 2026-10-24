@@ -237,7 +237,12 @@ class Agent:
         if rendered.errors:
             return abstain("calculation failed: " + "; ".join(rendered.errors), final.text)
         values = [s.value for s in sources.by_id.values() if s.value is not None]
-        passages = [s.evidence or "" for s in sources.by_id.values() if s.kind == "passage"]
+        # Extracted facts only exist when their quote passed the citation check.
+        passages = [
+            s.evidence or ""
+            for s in sources.by_id.values()
+            if s.kind == "passage" or s.source == "extracted"
+        ]
         loose = ungrounded(final.text, values + rendered.values, passages)
         if loose:
             return abstain(

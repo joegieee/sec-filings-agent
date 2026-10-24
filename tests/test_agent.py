@@ -8,7 +8,12 @@ import pytest
 
 from filings_agent.agent.agent import Agent
 from filings_agent.agent.calculator import CalcError, evaluate
-from filings_agent.agent.financials import build_financials, normalize_period, period_label
+from filings_agent.agent.financials import (
+    FinancialsIndex,
+    build_financials,
+    normalize_period,
+    period_label,
+)
 from filings_agent.agent.grounding import mentions, render, ungrounded
 from filings_agent.agent.models import AgentStep, FinalAnswer, ToolCall
 from filings_agent.agent.retrieval import SearchIndex, chunk, fts_queries
@@ -17,7 +22,14 @@ from filings_agent.evals.ground_truth import CompanyFacts
 from filings_agent.extract.models import ExtractionRecord, Figure, Metric
 from filings_agent.llm import LLMConfigError, LLMError
 from filings_agent.parse.models import SectionKind
-from tests.agent_fixtures import financials, parsed_filing, search_index, stored_filing
+from tests.agent_fixtures import (
+    NAMES,
+    fact,
+    financials,
+    parsed_filing,
+    search_index,
+    stored_filing,
+)
 from tests.conftest import FakeLLM
 
 
@@ -359,6 +371,24 @@ def test_guardrail_abstains_on_ungrounded_numbers(toolbox: Toolbox) -> None:
     assert answer.abstained and answer.ungrounded_numbers == ["$61 billion"]
     assert answer.draft == "Net income was $61 billion in FY2024."
     assert "numbers not found" in (answer.guardrail or "")
+
+
+def test_guardrail_accepts_numbers_quoted_by_extracted_facts(index: SearchIndex) -> None:
+    cet1 = fact("JPM", Metric.CET1_RATIO, "10-K", date(2024, 12, 31), 15.7)
+    quoted = cet1.model_copy(
+        update={
+            "source": "extracted",
+            "evidence": "Standardized and Advanced CET1 ratios were 15.7% and 15.8%",
+        }
+    )
+    call = ToolCall(
+        tool="get_financials", company="JPM", metric=Metric.CET1_RATIO, periods=["FY2024"]
+    )
+    text = "Standardized CET1 was 15.7% and Advanced 15.8%."
+    for f, abstained in [(quoted, False), (cet1, True)]:
+        toolbox = Toolbox(FinancialsIndex([f], NAMES), index)
+        answer = Agent(FakeLLM(step(call), final(text, ["F1"])), toolbox).ask("q")
+        assert answer.abstained is abstained
 
 
 def test_guardrail_requires_a_citation(toolbox: Toolbox) -> None:
