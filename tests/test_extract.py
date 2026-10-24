@@ -157,6 +157,7 @@ def test_citation_checks() -> None:
     row = "Net cash (used in) provided by operating activities | (250) | 310"
     assert quote_in_block("net cash (used in) provided by operating activities | (250)", row)
     assert quote_in_block("activities |(250)", row), "separator spacing is normalised"
+    assert quote_in_block("| Net cash (used in) provided by operating activities | (250) |", row)
     assert not quote_in_block("", row)
     assert shows_number("(1,234)", -1234)
     assert shows_number("2.71%", 2.71)

@@ -31,7 +31,8 @@ def numbers_in(text: str) -> list[float]:
 
 
 def quote_in_block(quote: str, block_text: str) -> bool:
-    q = normalize_text(quote)
+    # Models often quote a table row with its outer pipes, which block text doesn't keep.
+    q = normalize_text(quote).strip("| ")
     return bool(q) and q in normalize_text(block_text)
 
 
