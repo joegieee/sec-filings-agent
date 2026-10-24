@@ -148,41 +148,51 @@ from extraction. JSON reports are written to `data/evals/`.
 ### Results
 
 Run on 24 Oct 2026 over the 36 core3 filings (JPM, BAC, PYPL; 10-K and 10-Q, 2023–2026)
-with `claude-haiku-5-5` at default effort. The JSON reports are not checked in.
+with `claude-haiku-5-5` and `claude-sonnet-5-5`, both at default effort. Each model's Q&A
+run reads that model's own extractions. The JSON reports are not checked in.
 
 Context recall was 234/234. The selected context averaged 14,898 characters (about 3,700
 tokens), and no filing was truncated.
 
-| Metric | Accuracy (±0.5%) | Correct | Citations valid |
-|---|---:|---:|---:|
-| Revenue | 100.0% | 35/35 | 100.0% |
-| Net income | 100.0% | 35/35 | 100.0% |
-| Diluted EPS | 100.0% | 35/35 | 100.0% |
-| Total assets | 100.0% | 35/35 | 100.0% |
-| Total equity | 100.0% | 35/35 | 100.0% |
-| Operating cash flow | 100.0% | 35/35 | 100.0% |
-| Net interest income | 100.0% | 24/24 | 100.0% |
-| All scored metrics | 100.0% | 234/234 | 100.0% |
-
-Every correct value was also an exact match, and null handling was 100%. These metrics
-come from the primary statements, which makes them the easy case; NIM and CET1 are only
-checked for null handling. Extraction averaged 10,612 input and 1,748 output tokens,
-$0.0019 and 7.4 s per filing.
-
-| Measure | Score | Count |
+| Metric | Accuracy (±0.5%) | Correct |
 |---|---:|---:|
-| Answer accuracy (answerable) | 95.2% | 20/21 |
-| Abstention accuracy (unanswerable) | 100.0% | 8/8 |
-| False abstentions | 4.8% | 1/21 |
-| Citation precision | 100.0% | 39/39 |
-| From filing text | 80.0% | 4/5 |
+| Revenue | 100.0% | 35/35 |
+| Net income | 100.0% | 35/35 |
+| Diluted EPS | 100.0% | 35/35 |
+| Total assets | 100.0% | 35/35 |
+| Total equity | 100.0% | 35/35 |
+| Operating cash flow | 100.0% | 35/35 |
+| Net interest income | 100.0% | 24/24 |
+| All scored metrics | 100.0% | 234/234 |
 
-The set grew from 26 to 29 questions after the first run. A CET1 question had been
-answered correctly from an extracted figure's quote without searching, so it moved to
-the `quoted` kind, and three questions that only search can answer were added. The
-false abstention is a model error: Haiku subtracted two account counts itself instead of
-using the calculator, so the number check withheld the answer. Q&A averaged 1.8 LLM
-calls, $0.0010 and 4.8 s per question.
+Both models scored identically on extraction: every correct value was an exact match, and
+null handling was 100%. These metrics come from the primary statements, which makes them
+the easy case; NIM and CET1 are only checked for null handling.
+
+| Measure | Haiku 5.5 | Sonnet 5.5 |
+|---|---:|---:|
+| Extraction accuracy | 234/234 | 234/234 |
+| Citations valid | 100.0% | 99.7% |
+| Output tokens per filing | 1,748 | 930 |
+| Cost per filing | $0.0019 | $0.0305 |
+| Seconds per filing | 7.4 | 6.4 |
+| Q&A answer accuracy | 20/21 | 20/21 |
+| Abstention accuracy | 8/8 | 8/8 |
+| Citation precision | 39/39 | 37/37 |
+| From filing text | 4/5 | 4/5 |
+| Cost per question | $0.0010 | $0.0162 |
+| Seconds per question | 4.8 | 4.6 |
+| Total cost of both evals | $0.10 | $1.57 |
+
+On this set, Sonnet costs about 16 times as much for the same accuracy. Its invalid
+citation quoted a real CET1 sentence but cited the neighbouring block. Each model missed
+a different Q&A question, both withheld by the guardrail: Haiku subtracted two account
+counts itself instead of using the calculator, and Sonnet wrote a calculation over a
+source ID that didn't exist. Q&A averaged 1.8 LLM calls per question for both.
+
+The Q&A set grew from 26 to 29 questions after the first Haiku run. A CET1 question had
+been answered correctly from an extracted figure's quote without searching, so it moved
+to the `quoted` kind, and three questions that only search can answer were added.
 
 ## Providers
 
